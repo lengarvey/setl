@@ -28,21 +28,20 @@ Or install it yourself as:
 4. Define a destination object. Must respond to `#call` and sends output of each transformed row of data to a destination.
 
 ```ruby
-MySource = [{id: 1, name: 'foo'},{foo: 2, name: 'bar'}]
-MyDestination = lambda {|d| puts d.inspect }
+source = [{id: 1, name: 'foo'},{id: 2, name: 'bar'}]
+destination = lambda {|d| puts d.inspect }
 
-MyTransform = lambda do |d|
-  # In the transform `d` is a duplicated version of the row.
-  # So mutating methods like `upcase!` do not operate on the
-  # actual source row.
+transform = lambda do |d|
   d[:name].upcase!
   d
 end
 
-Setl::ETL.new(MySource, MyDestination).process(MyTransform)
+Setl::ETL.new(source, destination).process(transform)
   #=> {id: 1, name: 'FOO'}
   #=> {id: 2, name: 'BAR'}
 ```
+
+See the examples folder for some more extensive, and realistic, implementations.
 
 ## Contributing
 

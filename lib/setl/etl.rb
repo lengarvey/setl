@@ -9,8 +9,10 @@ module Setl
 
     def process(transform)
       source.each do |row|
+        row_copy = row.dup
+
         begin
-          destination.(transform.(row))
+          destination.(transform.(row_copy))
         rescue StandardError => e
           error_handler.(row, e)
         end
