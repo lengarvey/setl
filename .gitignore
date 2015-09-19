@@ -12,3 +12,5 @@
 *.o
 *.a
 mkmf.log
+
+/examples/products/Gemfile.lock
