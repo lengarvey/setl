@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'setl'
+require 'setl/etl'
 
 module Setl
   RSpec.describe 'etl' do
