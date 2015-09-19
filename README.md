@@ -20,7 +20,7 @@ Or install it yourself as:
 
     $ gem install setl
 
-## Usage
+## Basics
 
 1. Define an object that is responsible for sourcing the data. Must respond to `#each` and `yield` to the provided block.
 2. Define your transformations. These are simple objects that will receive one of the things provided by the source object.
@@ -42,6 +42,30 @@ Setl::ETL.new(source, destination).process(transform)
 ```
 
 See the examples folder for some more extensive, and realistic, implementations.
+
+## Error Handling
+
+By default Setl will ignore errors and move on to the next "row" of data. This is configurable with by setting `stop_on_errors` to true:
+
+```ruby
+Setl::ETL.new(source, destination, stop_on_errors: true).process(transform)
+```
+
+If you want to handle errors on your own and perhaps do some sort of logging then simply provide an `error_handler`.
+
+```ruby
+error_handler = proc { |row, exception| logger.error "Something failed on #{row.inspect} with #{exception.inspect}" }
+
+Setl::ETL.new(source, destination, error_handler: error_handler).process(transform)
+```
+
+If you provide an error handler, then `stop_on_errors` is ignored. You're responsible for handling your own errors. The error handler is simply an object that responds to `call` and accepts the failing row of data and the exception that was raised. You can retrieve the original exception by looking at `exception.cause`.
+
+## Tips and Todo
+
+* Mixes well with [Transproc](https://github.com/solnic/transproc).
+* Check out [Kiba](https://github.com/thbar/kiba) which is a more mature ETL library for Ruby.
+* Need to investigate how to dispatch rows to a job runner like Sidekiq or SQS.
 
 ## Contributing
 
