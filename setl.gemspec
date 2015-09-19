@@ -10,11 +10,10 @@ Gem::Specification.new do |spec|
   spec.email         = ["lengarvey@gmail.com"]
   spec.summary       = %q{Simple Extract Transform & Load - setl}
   spec.description   = %q{Can you setl for a tool that barely provides anything?}
-  spec.homepage      = ""
+  spec.homepage      = "https://github.com/lengarvey/setl"
   spec.license       = "MIT"
 
-  spec.files         = `git ls-files -z`.split("\x0")
-  spec.executables   = spec.files.grep(%r{^bin/}) { |f| File.basename(f) }
+  spec.files         = `git ls-files -z`.split("\x0").reject {|f| f.match /examples/}
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ["lib"]
 
