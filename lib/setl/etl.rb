@@ -9,15 +9,17 @@ module Setl
 
     def process(transform)
       source.each do |row|
-        row_copy = row.dup
+        @last_row = row
 
         begin
-          destination.(transform.(row_copy))
+          destination.(transform.(row))
         rescue StandardError => e
           error_handler.(row, e)
         end
       end
     end
+
+    attr_reader :last_row
 
     private
 
