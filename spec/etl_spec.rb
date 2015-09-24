@@ -3,7 +3,7 @@ require 'setl/etl'
 
 module Setl
   RSpec.describe 'etl' do
-    let(:etl) { ETL.new(source, destination) }
+    let(:etl) { ETL.new(source, destination, transform) }
 
     describe 'processing a row' do
       let(:row) { 'hello' }
@@ -13,7 +13,7 @@ module Setl
       let(:transform) { double('Transform', call: processed_data) }
 
       before do
-        etl.process(transform)
+        etl.process
       end
 
       it 'delegates the processing to the transform' do

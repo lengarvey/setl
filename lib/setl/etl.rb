@@ -1,21 +1,21 @@
+require_relative 'delegates'
+
 module Setl
   class ETL
-    def initialize(source, destination, stop_on_errors: false, error_handler: nil)
-      @source = source
-      @destination = destination
+    def initialize(source, destination, transform, stop_on_errors: false, error_handler: nil)
       @stop_on_errors = stop_on_errors
       @error_handler = error_handler || DefaultHandler.new(stop_on_errors)
+
+      @source = Source.new(source, @error_handler)
+      @destination = Destination.new(destination, @error_handler)
+      @transform = Transform.new(transform, @error_handler)
     end
 
-    def process(transform)
+    def process
       source.each do |row|
         @last_row = row
 
-        begin
-          destination.(transform.(row))
-        rescue StandardError => e
-          error_handler.(row, e)
-        end
+        destination.(transform.(row))
       end
     end
 
@@ -23,10 +23,7 @@ module Setl
 
     private
 
-    attr_reader :source, :destination, :stop_on_errors, :error_handler
-  end
-
-  class ProcessingError < StandardError
+    attr_reader :source, :destination, :transform, :stop_on_errors, :error_handler
   end
 
   class DefaultHandler
@@ -34,8 +31,8 @@ module Setl
       @reraise = reraise
     end
 
-    def call(row, exception)
-      raise ProcessingError, "Failed to process #{row}" if reraise?
+    def call(exception)
+      raise exception if reraise?
     end
 
     private

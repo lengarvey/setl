@@ -3,7 +3,7 @@ require 'setl/etl'
 
 module Setl
   RSpec.describe 'error handling' do
-    let(:etl) { ETL.new(source, destination) }
+    let(:etl) { ETL.new(source, destination, transform) }
     let(:source) { [1, 2] }
     let(:destination) { double('Destination', call: true) }
     let(:transform) do
@@ -14,7 +14,7 @@ module Setl
       end
     end
 
-    let(:process) { etl.process(transform) }
+    let(:process) { etl.process }
 
     context 'by default' do
       it 'rescues the error' do
@@ -29,7 +29,7 @@ module Setl
     end
 
     context 'when configured to stop on errors' do
-      let(:etl) { ETL.new(source, destination, stop_on_errors: true) }
+      let(:etl) { ETL.new(source, destination, transform, stop_on_errors: true) }
 
       it 'stops processing when a processing error occurs' do
         expect { process }.to raise_error(ProcessingError, 'Failed to process 1')
@@ -45,13 +45,63 @@ module Setl
     end
 
     context 'when provided an error handler' do
-      let(:handler) { double('Error Handler') }
-      let(:etl) { ETL.new(source, destination, error_handler: handler) }
+      let(:handler) do
+        Class.new do
+          def self.call(exception)
+            raise exception
+          end
+        end
+      end
 
-      it 'sends the row and exception to the handler' do
-        expect(handler).to receive(:call).with(1, an_instance_of(RuntimeError))
+      let(:etl) { ETL.new(source, destination, transform, error_handler: handler) }
+
+      it 'sends a processing error to the handler' do
+        expect(handler).to receive(:call).with(an_instance_of(ProcessingError))
 
         process
+      end
+
+      specify 'the error contains the original cause' do
+        begin
+          process
+        rescue ProcessingError => e
+          expect(e.cause).to be_a RuntimeError
+        end
+      end
+
+      context 'when the source raises an exception' do
+        let(:handler) { double('ErrorHandler', call: true) }
+
+        let(:source) do
+          Class.new do
+            def self.each
+              raise "nope"
+            end
+          end
+        end
+
+        it 'sends a SourceError to the handler' do
+          expect(handler).to receive(:call).with(an_instance_of(SourceError))
+
+          process
+        end
+      end
+
+      context 'when the destination raises an exception' do
+        let(:handler) { double('ErrorHandler', call: true) }
+        let(:destination) do
+          Class.new do
+            def self.call(row)
+              raise "lol"
+            end
+          end
+        end
+
+        it 'sends a destination error to the handler' do
+          expect(handler).to receive(:call).with(an_instance_of(DestinationError))
+
+          process
+        end
       end
     end
   end
