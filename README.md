@@ -36,7 +36,7 @@ transform = lambda do |d|
   d
 end
 
-Setl::ETL.new(source, destination).process(transform)
+Setl::ETL.new(source, destination, transform).process
   #=> {id: 1, name: 'FOO'}
   #=> {id: 2, name: 'BAR'}
 ```
@@ -48,7 +48,7 @@ See the examples folder for some more extensive, and realistic, implementations.
 By default Setl will ignore errors and move on to the next "row" of data. This is configurable with by setting `stop_on_errors` to true:
 
 ```ruby
-Setl::ETL.new(source, destination, stop_on_errors: true).process(transform)
+Setl::ETL.new(source, destination, transform, stop_on_errors: true).process
 ```
 
 If you want to handle errors on your own and perhaps do some sort of logging then simply provide an `error_handler`.
@@ -56,7 +56,7 @@ If you want to handle errors on your own and perhaps do some sort of logging the
 ```ruby
 error_handler = proc { |row, exception| logger.error "Something failed on #{row.inspect} with #{exception.inspect}" }
 
-Setl::ETL.new(source, destination, error_handler: error_handler).process(transform)
+Setl::ETL.new(source, destination, transform, error_handler: error_handler).process
 ```
 
 If you provide an error handler, then `stop_on_errors` is ignored. You're responsible for handling your own errors. The error handler is simply an object that responds to `call` and accepts the failing row of data and the exception that was raised. You can retrieve the original exception by looking at `exception.cause`.

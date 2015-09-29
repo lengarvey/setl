@@ -47,4 +47,4 @@ end
 
 Destination = proc { |output| puts output.inspect }
 
-Setl::ETL.new(Products.new, Destination).process(ProductTransformations)
+Setl::ETL.new(Products.new, Destination, ProductTransformations).process
