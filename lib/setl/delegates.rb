@@ -20,7 +20,7 @@ module Setl
       if e.is_a? ETLError
         raise e
       else
-        error_handler.(SourceError.new("Failed to read from source"))
+        error_handler.(SourceError.new("Failed to read from source", e))
       end
     end
   end
@@ -29,7 +29,7 @@ module Setl
     def call(row, &block)
       item.call(row, &block)
     rescue StandardError => e
-      error_handler.(ProcessingError.new(row, "Failed to process #{row}"))
+      error_handler.(ProcessingError.new(row, "Failed to process #{row}", e))
     end
   end
 
@@ -37,7 +37,7 @@ module Setl
     def call(row, &block)
       item.call(row, &block)
     rescue StandardError => e
-      error_handler.(DestinationError.new(row, "Failed to send #{row}"))
+      error_handler.(DestinationError.new(row, "Failed to send #{row}", e))
     end
   end
 end
